@@ -11,4 +11,5 @@ git add .
 git add dist -f
 git commit -m 'deploy'
 
+git push -u origin master
 git subtree push --prefix dist origin gh-pages
