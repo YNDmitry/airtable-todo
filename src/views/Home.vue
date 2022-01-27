@@ -64,7 +64,7 @@
                 Customers is empty
               </h1>
               <tbody v-else class="text-sm divide-y divide-gray-100">
-                <tr v-for="el in tableData" :key="el" :id="el.id">
+                <tr v-for="(el, idx) in tableData" :key="el" :id="el.id">
                   <td class="p-2 whitespace-nowrap">
                     <div class="flex items-center">
                       <div
@@ -107,12 +107,8 @@
                     </div>
                   </td>
                   <td class="p-2 whitespace-nowrap text-center">
-                    <button type="button" class="text-lg" @click="remove(el.id)">
-                      <img
-                        src="../assets/images/times-solid.svg"
-                        width="10"
-                        alt=""
-                      />
+                    <button type="button" class="text-lg" @click="remove(el.id, idx)">
+                      <close-ico></close-ico>
                     </button>
                   </td>
                 </tr>
@@ -129,15 +125,16 @@
       @submitAlert="showAlert"
       @setStatus="getStatus"
     ></dynamic-form>
+    <the-alert ref="alert" :title="alertTitle" :status="alertStatus"></the-alert>
   </section>
 
-  <the-alert ref="alert" :title="alertTitle" :status="alertStatus"></the-alert>
 </template>
 
 <script>
 import { key, apiKey } from '../api/index'
 import DynamicForm from '../components/DynamicForm.vue'
 import TheAlert from '../components/TheAlert.vue'
+import closeIco from '../components/icons/closeIco.vue'
 
 export default {
   name: 'Home',
@@ -145,6 +142,7 @@ export default {
   components: {
     DynamicForm,
     TheAlert,
+    closeIco
   },
 
   data() {
@@ -195,16 +193,21 @@ export default {
       }
     },
 
-    async remove(id) {
-      await fetch(
+    async remove(id, idx) {
+      const res = await fetch(
         `https://api.airtable.com/v0/appVgmiQc5iKntuOo/Tasks/${id}?api_key=${apiKey}`,
         {
           method: 'DELETE',
         }
       )
 
-      const index = this.tableData.indexOf(id, 1)
-      this.tableData.splice(index, 1)
+      if (res.ok) {
+        this.tableData.splice(idx, 1)
+        this.showAlert()
+      } else {
+        this.alertTitle = 'Error'
+        this.showAlert()
+      }
     },
 
     showForm() {
